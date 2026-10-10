@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { @apply bg-[#070b16] text-slate-200 font-sans antialiased; }
+section { scroll-margin-top: 80px; }
+
+@layer components {
+  .grad { @apply bg-gradient-to-r from-indigo-400 via-cyan-400 to-pink-400 bg-[length:200%] bg-clip-text text-transparent animate-shift; }
+  .card { @apply rounded-2xl border border-white/10 bg-white/[0.04] transition duration-300 hover:-translate-y-2 hover:border-indigo-500 hover:shadow-[0_20px_50px_-15px_rgba(99,102,241,.5)]; }
+  .btn { @apply inline-block rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 px-7 py-3 font-semibold text-white transition hover:scale-105; }
+  .btn-outline { @apply inline-block rounded-full border border-white/20 px-7 py-3 font-semibold transition hover:bg-white/10; }
+  .blob { @apply absolute rounded-full opacity-30 blur-[90px] animate-float; }
+}

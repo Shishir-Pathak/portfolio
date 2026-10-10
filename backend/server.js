@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import experienceRoutes from "./routes/experienceRoutes.js";
+import siteSettingsRoutes from "./routes/siteSettingsRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -78,6 +79,7 @@ app.use("/api/about", aboutRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/experience", experienceRoutes);
+app.use("/api/settings", siteSettingsRoutes);
 
 // Handle unknown routes
 app.use((req, res) => {
@@ -124,6 +126,8 @@ const startServer = async () => {
       console.log("     POST   /api/experience       ← admin");
       console.log("     PUT    /api/experience/:id   ← admin");
       console.log("     DELETE /api/experience/:id   ← admin");
+      console.log("     GET    /api/settings         ← public");
+      console.log("     PUT    /api/settings         ← admin");
       console.log("═══════════════════════════════════════════════");
       console.log("");
     });
