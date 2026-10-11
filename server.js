@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import experienceRoutes from "./routes/experienceRoutes.js";
+import siteSettingsRoutes from "./routes/siteSettingsRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 
 const app = express();
@@ -28,7 +29,16 @@ if (process.env.JWT_SECRET.length < 32) {
 
 // Security
 app.disable("x-powered-by");
-app.use(helmet());
+
+// ─────────────────────────────────────────────────────────────
+// Helmet — crossOriginResourcePolicy MUST be "cross-origin" so
+// browsers on a different domain (Vercel) can read the response.
+// ─────────────────────────────────────────────────────────────
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 // ── Request logger ─────────────────────────────────────────
 // Prints every request + response status so you can see exactly
@@ -50,10 +60,42 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS configuration
+// ─────────────────────────────────────────────────────────────
+// CORS — allow local dev + ANY *.vercel.app subdomain.
+//
+// Vercel generates a NEW preview URL for every deploy, so a
+// hardcoded list gets stale fast. This regex approach means you
+// never have to update this file again when Vercel changes URLs.
+// You can also add a custom domain via the FRONTEND_URL env var.
+// ─────────────────────────────────────────────────────────────
+const staticAllowed = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173", // vite preview
+];
+
+// Optional: an extra origin passed via env (e.g. a custom domain)
+const envOrigin = process.env.FRONTEND_URL?.trim();
+if (envOrigin && !staticAllowed.includes(envOrigin)) {
+  staticAllowed.push(envOrigin);
+}
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (Postman, curl, mobile apps)
+      if (!origin) return callback(null, true);
+
+      const isLocalhost = staticAllowed.includes(origin);
+      const isVercel = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin);
+
+      if (isLocalhost || isVercel) {
+        return callback(null, true);
+      }
+
+      console.log("❌ CORS blocked origin:", origin);
+      return callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -78,6 +120,7 @@ app.use("/api/about", aboutRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/experience", experienceRoutes);
+app.use("/api/settings", siteSettingsRoutes);
 
 // Handle unknown routes
 app.use((req, res) => {
@@ -124,6 +167,8 @@ const startServer = async () => {
       console.log("     POST   /api/experience       ← admin");
       console.log("     PUT    /api/experience/:id   ← admin");
       console.log("     DELETE /api/experience/:id   ← admin");
+      console.log("     GET    /api/settings         ← public");
+      console.log("     PUT    /api/settings         ← admin");
       console.log("═══════════════════════════════════════════════");
       console.log("");
     });
