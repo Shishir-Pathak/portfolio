@@ -22,10 +22,12 @@ import ProductManagement from "./pages/admin/ProductManagement.jsx";
 import ProductForm from "./pages/admin/ProductForm.jsx";
 import ExperienceManagement from "./pages/admin/ExperienceManagement.jsx";
 import ExperienceForm from "./pages/admin/ExperienceForm.jsx";
+import SocialLinksManagement from "./pages/admin/SocialLinksManagement.jsx";
 
 import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
 import AdminLayout from "./components/admin/AdminLayout.jsx";
 import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 
 function ScrollHandler() {
   const { pathname, hash } = useLocation();
@@ -55,6 +57,7 @@ function MainLayout({ children }) {
     <>
       <Navbar />
       <main>{children}</main>
+      <Footer />
     </>
   );
 }
@@ -106,22 +109,20 @@ function AppRoutes() {
         <Route element={<AdminProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
-
             <Route path="about" element={<AboutManagement />} />
 
-            {/* ── Contact / Messages ────────────────────── */}
             <Route path="contacts" element={<ContactMessages />} />
             <Route path="contacts/:id" element={<ContactDetail />} />
 
-            {/* ── Products ─────────────────────────────── */}
             <Route path="products" element={<ProductManagement />} />
             <Route path="products/new" element={<ProductForm />} />
             <Route path="products/:id/edit" element={<ProductForm />} />
 
-            {/* ── Experience ───────────────────────────── */}
             <Route path="experience" element={<ExperienceManagement />} />
             <Route path="experience/new" element={<ExperienceForm />} />
             <Route path="experience/:id/edit" element={<ExperienceForm />} />
+
+            <Route path="social-links" element={<SocialLinksManagement />} />
           </Route>
         </Route>
 

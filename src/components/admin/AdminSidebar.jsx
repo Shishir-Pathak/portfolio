@@ -11,7 +11,8 @@ const menuItems = [
   { label: "About Me", path: "/admin/about", icon: "👤", end: true },
   { label: "Products", path: "/admin/products", icon: "📦", end: false },
   { label: "Courses", path: "/admin/courses", icon: "▤", end: true },
-  { label: "Experience", path: "/admin/experience", icon: "💼", end: true },
+  { label: "Experience", path: "/admin/experience", icon: "💼", end: false },
+  { label: "Social Links", path: "/admin/social-links", icon: "🔗", end: true },
   { label: "Settings", path: "/admin/settings", icon: "⚙", end: true },
 ];
 

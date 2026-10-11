@@ -10,8 +10,25 @@ import axios from "axios";
 //   VITE_API_URL=http://localhost:5000/         (also works)
 // …and we'll always end up with "…/api" as the base.
 // ─────────────────────────────────────────────────────────────
-const rawBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const API_ORIGIN = rawBase.replace(/\/+$/, "").replace(/\/api$/, "");
+
+const rawBase = import.meta.env.VITE_API_URL;
+
+// Loud warning if the env var is missing — saves hours of debugging.
+if (!rawBase) {
+  console.error(
+    "🚨 CRITICAL: VITE_API_URL is missing!\n" +
+    "  • Locally → create frontend/.env.local and set VITE_API_URL=http://localhost:5000\n" +
+    "  • On Vercel → Project → Settings → Environment Variables → add VITE_API_URL"
+  );
+}
+
+// Only fall back to localhost during local development.
+// In production (Vercel build), an empty string makes the request
+// hit the same origin, so failures are obvious in DevTools.
+const fallbackBase = import.meta.env.DEV ? "http://localhost:5000" : "";
+const API_ORIGIN = (rawBase || fallbackBase)
+  .replace(/\/+$/, "")   // strip trailing slashes
+  .replace(/\/api$/, ""); // strip a trailing "/api" if the user added it
 const baseURL = `${API_ORIGIN}/api`;
 
 const api = axios.create({
@@ -80,9 +97,9 @@ api.interceptors.response.use(
   }
 );
 
-// Optional: log the resolved base URL once at startup (dev only).
+// Log the resolved base URL once at startup (dev only).
 if (import.meta.env.DEV) {
-  console.log("🔗 API base URL:", baseURL);
+  console.log("🔗 API base URL resolved to:", baseURL);
 }
 
 export default api;
