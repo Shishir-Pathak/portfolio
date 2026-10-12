@@ -3,15 +3,39 @@ import axios from "axios";
 
 // ─────────────────────────────────────────────────────────────
 // Build the base URL from VITE_API_URL.
+//
+// Priority order:
+//   1. VITE_API_URL   (set on Vercel / in .env.local)
+//   2. Local dev fallback → http://localhost:5000
+//   3. Production fallback → the live Render backend URL
+//
 // We ALWAYS append "/api", stripping any trailing slash first.
 // This means the env var can be either:
-//   VITE_API_URL=http://localhost:5000
-//   VITE_API_URL=http://localhost:5000/api      (also works)
-//   VITE_API_URL=http://localhost:5000/         (also works)
+//   VITE_API_URL=https://shishir-portfolio-backend-cqmp.onrender.com
+//   VITE_API_URL=https://shishir-portfolio-backend-cqmp.onrender.com/
+//   VITE_API_URL=https://shishir-portfolio-backend-cqmp.onrender.com/api  (also works)
 // …and we'll always end up with "…/api" as the base.
 // ─────────────────────────────────────────────────────────────
-const rawBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const API_ORIGIN = rawBase.replace(/\/+$/, "").replace(/\/api$/, "");
+
+const PROD_FALLBACK = "https://shishir-portfolio-backend-cqmp.onrender.com";
+const DEV_FALLBACK = "http://localhost:5000";
+
+const rawBase =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? DEV_FALLBACK : PROD_FALLBACK);
+
+// Warn (dev only) if the env var is missing — helps catch misconfig early.
+if (import.meta.env.DEV && !import.meta.env.VITE_API_URL) {
+  console.warn(
+    "⚠️  VITE_API_URL not set — falling back to http://localhost:5000 for local dev.\n" +
+    "   To silence this: create frontend/.env.local with VITE_API_URL=http://localhost:5000"
+  );
+}
+
+// Strip trailing slashes and any trailing "/api" so we can safely append "/api"
+const API_ORIGIN = String(rawBase)
+  .replace(/\/+$/, "")   // remove trailing slashes
+  .replace(/\/api$/, ""); // remove a trailing "/api" if the user added it
 const baseURL = `${API_ORIGIN}/api`;
 
 const api = axios.create({
@@ -80,9 +104,9 @@ api.interceptors.response.use(
   }
 );
 
-// Optional: log the resolved base URL once at startup (dev only).
+// Log the resolved base URL once at startup (dev only).
 if (import.meta.env.DEV) {
-  console.log("🔗 API base URL:", baseURL);
+  console.log("🔗 API base URL resolved to:", baseURL);
 }
 
 export default api;
